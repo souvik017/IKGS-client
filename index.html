@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#3568F5" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>IKGS Solution | Pest Control & Hygiene Services in West Bengal</title>
+    <meta
+      name="description"
+      content="Professional pest control and hygiene solutions for homes, offices and commercial spaces across our service areas in West Bengal."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://ikgssolution.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="IKGS Solution" />
+    <meta property="og:title" content="IKGS Solution | Pest Control & Hygiene Services" />
+    <meta
+      property="og:description"
+      content="Professional pest control and hygiene solutions for homes, offices and commercial spaces across West Bengal."
+    />
+    <meta property="og:url" content="https://ikgssolution.com/" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      Boot loader.
+      ------------------------------------------------------------------
+      The Tailwind stylesheet is a separate, render-blocking request, so the
+      first paint used to show the unstyled fallback markup for a moment. This
+      block is inline, so the very first paint is already a branded screen; the
+      app fades it out once the shell has mounted and the first settings
+      request has settled. Keep it dependency-free and inline.
+    -->
+    <style>
+      html {
+        background: #ffffff;
+      }
+      body {
+        margin: 0;
+      }
+      #ikgs-preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 24px;
+        background: #ffffff;
+        transition: opacity 0.45s ease, visibility 0.45s ease;
+      }
+      #ikgs-preloader .ikgs-preloader__logo {
+        width: auto;
+        height: 40px;
+        max-width: 60vw;
+        object-fit: contain;
+      }
+      #ikgs-preloader .ikgs-preloader__ring {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 3px solid #eaf0ff;
+        border-top-color: #3568f5;
+        animation: ikgs-preloader-spin 0.8s linear infinite;
+      }
+      #ikgs-preloader.ikgs-preloader--hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      @keyframes ikgs-preloader-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (min-width: 640px) {
+        #ikgs-preloader .ikgs-preloader__logo {
+          height: 48px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #ikgs-preloader .ikgs-preloader__ring {
+          animation: none;
+          border-top-color: #eaf0ff;
+        }
+      }
+    </style>
+
+    <link rel="preload" as="image" href="/images/logo/ikgs-logo.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="ikgs-preloader" role="status" aria-live="polite" aria-label="Loading IKGS Solution">
+      <img
+        class="ikgs-preloader__logo"
+        src="/images/logo/ikgs-logo.webp"
+        alt="IKGS Solution"
+        width="560"
+        height="181"
+        fetchpriority="high"
+      />
+      <span class="ikgs-preloader__ring" aria-hidden="true"></span>
+    </div>
+
+    <div id="root">
+      <!-- Static fallback content for crawlers that do not execute JavaScript.
+           React replaces this on hydration, and the boot loader above keeps it
+           out of sight until the stylesheet has applied. -->
+      <main>
+        <h1>IKGS Solution - Pest Control &amp; Hygiene Services in West Bengal</h1>
+        <p>
+          Professional pest control for cockroaches, termites, rodents, mosquitoes and bed bugs, plus
+          commercial pest management and sanitization for homes, offices and businesses across West
+          Bengal.
+        </p>
+        <nav>
+          <a href="/">Home</a> | <a href="/about">About</a> | <a href="/services">Services</a> |
+          <a href="/gallery">Gallery</a> | <a href="/contact">Contact</a>
+        </nav>
+      </main>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

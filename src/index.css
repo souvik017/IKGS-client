@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens (mirrored in tailwind.config.js)
+   --------------------------------------------------------------------------- */
+:root {
+  --ikgs-primary: #3568f5;
+  --ikgs-primary-dark: #2a55d8;
+  --ikgs-deep: #294ead;
+  --ikgs-navy: #11101f;
+  --ikgs-body: #5f6068;
+  --ikgs-ice: #eaf0ff;
+  --ikgs-frost: #dce8ff;
+  --ikgs-line: #e9ebf2;
+  --ikgs-offwhite: #f8f9fc;
+  --ikgs-white: #ffffff;
+  --ikgs-gradient: linear-gradient(110deg, #3568f5 0%, #294ead 100%);
+  --ikgs-shadow-card: 0 4px 24px -8px rgba(17, 16, 31, 0.1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white font-sans text-body antialiased;
+    /* Prevent accidental horizontal overflow at every breakpoint. */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-extrabold text-navy;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white;
+  }
+
+  /* Respect the user's motion preference for CSS-driven motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Layout ---------------------------------------------------------------- */
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-20 sm:py-24 lg:py-28;
+  }
+
+  /* Buttons --------------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold
+      transition-all duration-300 ease-smooth disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Signature blue gradient reserved for primary conversion actions. */
+  .btn-primary {
+    @apply btn bg-brand-gradient text-white shadow-soft hover:shadow-lift hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-white text-navy hover:border-primary hover:text-primary hover:-translate-y-0.5;
+  }
+
+  /* Neutral action button. Used for Cancel/Close actions in the admin dialogs,
+     which previously referenced a class that was never defined. */
+  .btn-outline {
+    @apply btn border border-navy/15 bg-white text-navy/80 hover:border-navy/30 hover:bg-mist hover:text-navy;
+  }
+
+  .btn-ghost {
+    @apply btn text-body hover:bg-offwhite hover:text-navy;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-xs;
+  }
+
+  /* Text links ------------------------------------------------------------ */
+  .link {
+    @apply font-semibold text-primary underline-offset-4 transition-colors hover:text-primary-dark hover:underline;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-ice px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary;
+  }
+
+  /* Forms ----------------------------------------------------------------- */
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-navy;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-navy
+      placeholder:text-body/50 transition-colors duration-200
+      focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
+  }
+
+  .input-error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/20;
+  }
+
+  .field-error {
+    @apply mt-1.5 flex items-center gap-1 text-xs font-medium text-red-600;
+  }
+
+  /* Surfaces -------------------------------------------------------------- */
+  .card {
+    @apply rounded-2xl border border-line bg-white p-6 shadow-card;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 ease-smooth hover:-translate-y-1 hover:shadow-lift;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .icon-tile {
+    @apply grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-ice text-primary transition-colors duration-300;
+  }
+
+  /* Decorative motif ------------------------------------------------------ */
+  .decor-dots {
+    background-image: radial-gradient(currentColor 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+  }
+
+  /* Fade content that sits under the sticky header when jumping via #anchors */
+  .scroll-mt-header {
+    scroll-margin-top: 6rem;
+  }
+}

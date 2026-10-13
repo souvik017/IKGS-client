@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="IKGS Solution">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D0B1B"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="80" y="260" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" fill="#ffffff">
+    IKGS Solution
+  </text>
+  <text x="80" y="340" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="600" fill="#3B6FF2">
+    Pest Control &amp; Hygiene Services
+  </text>
+  <text x="80" y="410" font-family="Inter, Arial, sans-serif" font-size="30" fill="#c7cbd8">
+    Serving homes, offices and businesses across West Bengal
+  </text>
+</svg>

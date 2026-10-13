@@ -1,0 +1,17 @@
+# IKGS Solution - https://ikgssolution.com
+User-agent: *
+Allow: /
+Allow: /services
+Allow: /about
+Allow: /book-now
+Allow: /contact
+
+# The admin panel must never be indexed.
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+# Crawl-delay is a request, honoured by some crawlers only.
+Crawl-delay: 1
+
+Sitemap: https://ikgssolution.com/sitemap.xml
