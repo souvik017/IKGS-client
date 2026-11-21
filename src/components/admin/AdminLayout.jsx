@@ -1,13 +1,32 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { LogOut, Menu } from 'lucide-react';
+import { Bell, LogOut, Menu } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Sidebar from './Sidebar';
 import { Loading } from '../public/States';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../lib/api';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { admin, logout } = useAuth();
+  const [unseen, setUnseen] = useState(0);
+
+  useEffect(() => {
+    const stream = new EventSource(`${API_BASE_URL}/notifications/stream`, { withCredentials: true });
+    stream.addEventListener('notification', (event) => {
+      const notification = JSON.parse(event.data);
+      if (notification.type !== 'closure-request') return;
+      setUnseen((count) => count + 1);
+      toast((t) => (
+        <Link to="/admin/closure-requests" onClick={() => toast.dismiss(t.id)} className="block">
+          <strong className="block">{notification.title}</strong>
+          <span className="text-sm">{notification.message} · Review now</span>
+        </Link>
+      ), { duration: 12000 });
+    });
+    return () => stream.close();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-mist">
@@ -25,6 +44,10 @@ export default function AdminLayout() {
           </button>
 
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-4">
+            <Link to="/admin/closure-requests" onClick={() => setUnseen(0)} className="relative rounded-lg p-2 text-navy hover:bg-mist" aria-label={`Closure notifications${unseen ? `, ${unseen} unread` : ''}`} title="Closure requests">
+              <Bell className="h-5 w-5" />
+              {unseen > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">{unseen > 9 ? '9+' : unseen}</span>}
+            </Link>
             <div className="min-w-0 text-right">
               <p className="truncate text-sm font-semibold text-navy">{admin?.name}</p>
               <p className="hidden truncate text-xs text-navy/50 min-[420px]:block">{admin?.email}</p>

@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+const configuredApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+export const API_BASE_URL = configuredApiUrl
+  ? (configuredApiUrl.endsWith('/api') ? configuredApiUrl : `${configuredApiUrl}/api`)
+  : '/api';
 
 // Token is kept in memory for the session. The backend also sets an httpOnly
 // cookie, so a page reload keeps the admin logged in without exposing the token.
@@ -18,7 +21,7 @@ const readCookie = (name) => {
 };
 
 const api = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });

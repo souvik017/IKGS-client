@@ -10,6 +10,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -34,6 +36,10 @@ export default function Settings() {
         phone: form.phone,
         altPhone: form.altPhone,
         email: form.email,
+        bankName: form.bankName,
+        bankBranch: form.bankBranch,
+        bankAccount: form.bankAccount,
+        bankIfsc: form.bankIfsc,
         whatsapp: form.whatsapp,
         address: form.address,
         businessHours: form.businessHours,
@@ -61,6 +67,12 @@ export default function Settings() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault(); setPasswordSaving(true);
+    try { await put('/auth/password', passwordForm); setPasswordForm({ currentPassword: '', newPassword: '' }); toast.success('Admin password changed'); }
+    catch (err) { toast.error(err.message); } finally { setPasswordSaving(false); }
   };
 
   if (loading) return <Loading label="Loading settings…" />;
@@ -176,6 +188,10 @@ export default function Settings() {
             Tax is applied to quotations and invoices only when enabled here.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
+            <div><label className="label" htmlFor="st-bank-name">Bank name</label><input id="st-bank-name" className="input" value={form.bankName || ''} onChange={e => set('bankName',e.target.value)} /></div>
+            <div><label className="label" htmlFor="st-bank-branch">Branch name</label><input id="st-bank-branch" className="input" value={form.bankBranch || 'Kalyani'} onChange={e => set('bankBranch',e.target.value)} /></div>
+            <div><label className="label" htmlFor="st-bank-account">Account number</label><input id="st-bank-account" className="input" value={form.bankAccount || ''} onChange={e => set('bankAccount',e.target.value)} /></div>
+            <div><label className="label" htmlFor="st-bank-ifsc">IFSC</label><input id="st-bank-ifsc" className="input" value={form.bankIfsc || ''} onChange={e => set('bankIfsc',e.target.value)} /></div>
             <div>
               <label className="label" htmlFor="st-qt-prefix">Quotation prefix</label>
               <input id="st-qt-prefix" className="input" value={form.quotationPrefix || ''} onChange={(e) => set('quotationPrefix', e.target.value)} />
@@ -217,6 +233,7 @@ export default function Settings() {
           </div>
         </section>
       </form>
+      <section className="card mt-6"><h2 className="text-lg font-bold text-navy">Admin password</h2><p className="mb-4 mt-1 text-sm text-navy/55">Change the password for your current administrator account.</p><form onSubmit={changePassword} className="grid gap-4 sm:grid-cols-3 sm:items-end"><label className="label">Current password<input required type="password" autoComplete="current-password" className="input" value={passwordForm.currentPassword} onChange={e=>setPasswordForm({...passwordForm,currentPassword:e.target.value})}/></label><label className="label">New password<input required minLength="8" type="password" autoComplete="new-password" className="input" value={passwordForm.newPassword} onChange={e=>setPasswordForm({...passwordForm,newPassword:e.target.value})}/></label><button className="btn-primary" disabled={passwordSaving}>{passwordSaving?'Updating…':'Change password'}</button></form></section>
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Download, Eye, Filter, Plus, RefreshCw, Trash2 } from 'lucide-react';
 
@@ -12,22 +13,25 @@ import { fetchPdf, get, post, put } from '../../lib/api';
 import { currency, formatDate } from '../../lib/format';
 
 const STATUSES = ['draft', 'sent', 'accepted', 'rejected', 'expired'];
-const blankItem = () => ({ item: '', quantity: 1, unitPrice: 0, discount: 0 });
+const blankItem = () => ({ item: '', description: '', quantity: 1, unitPrice: 0, discount: 0 });
+const splitLines = value => String(value || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
 
 export default function Quotations() {
   const { rows, pagination, loading, error, page, setPage, search, setSearch, filters, updateFilter, reload } =
     useResource('/quotations');
 
   const [customers, setCustomers] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [detail, setDetail] = useState(null);
-  const [form, setForm] = useState({ customer: '', validUntil: '', terms: '', items: [blankItem()] });
+  const [form, setForm] = useState({ customer: '', recipientName: '', recipientOrganization: '', recipientAddress: '', subject: '', introduction: '', scopeItems: '', treatmentAreas: '', methodology: '', serviceFrequency: '', commitment: '', validUntil: '', discount: '', terms: '', notes: '', items: [blankItem()] });
 
   useEffect(() => {
     get('/customers', { limit: 100 })
       .then((res) => setCustomers(res.data))
       .catch(() => setCustomers([]));
+    get('/settings').then(res => setSettings(res.data.settings)).catch(() => setSettings(null));
   }, []);
 
   const updateItem = (index, patch) => {
@@ -44,8 +48,13 @@ export default function Quotations() {
     try {
       await post('/quotations', {
         ...form,
+        scopeItems: splitLines(form.scopeItems),
+        treatmentAreas: splitLines(form.treatmentAreas),
+        methodology: splitLines(form.methodology),
+        discount: Number(form.discount) || 0,
         items: form.items.map((i) => ({
           item: i.item,
+          description: i.description,
           quantity: Number(i.quantity),
           unitPrice: Number(i.unitPrice),
           discount: Number(i.discount) || 0,
@@ -53,7 +62,7 @@ export default function Quotations() {
       });
       toast.success('Quotation created');
       setOpen(false);
-      setForm({ customer: '', validUntil: '', terms: '', items: [blankItem()] });
+      setForm({ customer: '', recipientName: '', recipientOrganization: '', recipientAddress: '', subject: '', introduction: '', scopeItems: '', treatmentAreas: '', methodology: '', serviceFrequency: '', commitment: '', validUntil: '', discount: '', terms: '', notes: '', items: [blankItem()] });
       reload();
     } catch (err) {
       toast.error(err.message);
@@ -89,10 +98,11 @@ export default function Quotations() {
     }
   };
 
-  const estimate = form.items.reduce(
-    (sum, i) => sum + Number(i.quantity) * Number(i.unitPrice) - (Number(i.discount) || 0),
-    0
-  );
+  const preTax = Math.max(0, form.items.reduce((sum, i) => sum + Number(i.quantity) * Number(i.unitPrice) - (Number(i.discount) || 0), 0) - (Number(form.discount) || 0));
+  const estimateTax = settings?.tax?.enabled ? Math.round(preTax * Number(settings.tax.rate || 0)) / 100 : 0;
+  const estimateUnrounded = preTax + estimateTax;
+  const estimate = Math.floor(estimateUnrounded);
+  const estimateRoundOff = estimate - estimateUnrounded;
 
   const columns = [
     { key: 'quotationNumber', header: 'Number', render: (r) => <span className="font-mono text-xs">{r.quotationNumber}</span> },
@@ -194,6 +204,29 @@ export default function Quotations() {
             </div>
           </div>
 
+          <section className="space-y-3 rounded-xl border border-navy/10 p-4">
+            <h3 className="font-semibold text-navy">Proposal recipient and subject</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="label">Recipient / authority name<input className="input" value={form.recipientName} onChange={e=>setForm({...form,recipientName:e.target.value})} placeholder="The Managing Authority"/></label>
+              <label className="label">Organization / site<input className="input" value={form.recipientOrganization} onChange={e=>setForm({...form,recipientOrganization:e.target.value})} placeholder="School, hotel, or company name"/></label>
+              <label className="label sm:col-span-2">Recipient address<input className="input" value={form.recipientAddress} onChange={e=>setForm({...form,recipientAddress:e.target.value})} placeholder="City, district, state"/></label>
+              <label className="label sm:col-span-2">Proposal subject<input className="input" value={form.subject} onChange={e=>setForm({...form,subject:e.target.value})} placeholder="Proposal for Integrated Pest Management Services"/></label>
+              <label className="label sm:col-span-2">Introduction<textarea rows={3} className="input" value={form.introduction} onChange={e=>setForm({...form,introduction:e.target.value})} placeholder="Short introduction for this proposal"/></label>
+            </div>
+          </section>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="label">Scope of services <span className="font-normal text-navy/40">(one per line)</span><textarea rows={5} className="input" value={form.scopeItems} onChange={e=>setForm({...form,scopeItems:e.target.value})} placeholder={'Inspection and treatment\nCockroach and ant control\nPreventive monitoring'}/></label>
+            <label className="label">Treatment areas <span className="font-normal text-navy/40">(one per line)</span><textarea rows={5} className="input" value={form.treatmentAreas} onChange={e=>setForm({...form,treatmentAreas:e.target.value})} placeholder={'School premises\nKitchen and canteen\nClassrooms and corridors'}/></label>
+            <label className="label">Service methodology <span className="font-normal text-navy/40">(one per line)</span><textarea rows={5} className="input" value={form.methodology} onChange={e=>setForm({...form,methodology:e.target.value})} placeholder={'Inspect the site before treatment\nUse approved products\nProvide prevention recommendations'}/></label>
+            <label className="label">Service frequency<input className="input" value={form.serviceFrequency} onChange={e=>setForm({...form,serviceFrequency:e.target.value})} placeholder="02 preventive visits per month"/></label>
+            <label className="label sm:col-span-2">Commitment / closing statement<textarea rows={3} className="input" value={form.commitment} onChange={e=>setForm({...form,commitment:e.target.value})} placeholder="Leave blank to use the standard company commitment."/></label>
+          </div>
+
+          <div className={`rounded-lg p-3 text-sm ${settings?.tax?.enabled?'bg-emerald-50 text-emerald-800':'bg-amber-50 text-amber-900'}`}>
+            {settings?.tax?.enabled ? `${settings.tax.label || 'GST'} is enabled at ${Number(settings.tax.rate || 0)}%. It will be calculated by the server and shown on the quotation.` : <>Tax is currently disabled. To turn it on, open <Link className="font-semibold underline" to="/admin/settings">Settings → Documents &amp; tax</Link>, enable tax, set its rate, and save.</>}
+          </div>
+
           <div>
             <div className="mb-2 flex items-center justify-between">
               <span className="label mb-0">Line items *</span>
@@ -203,49 +236,13 @@ export default function Quotations() {
             </div>
             <div className="space-y-3">
               {form.items.map((item, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2">
-                  <input
-                    className="input col-span-5"
-                    placeholder="Item description"
-                    required
-                    value={item.item}
-                    onChange={(e) => updateItem(index, { item: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    min="1"
-                    className="input col-span-2"
-                    placeholder="Qty"
-                    value={item.quantity}
-                    onChange={(e) => updateItem(index, { quantity: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="input col-span-2"
-                    placeholder="Rate"
-                    value={item.unitPrice}
-                    onChange={(e) => updateItem(index, { unitPrice: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="input col-span-2"
-                    placeholder="Discount"
-                    value={item.discount}
-                    onChange={(e) => updateItem(index, { discount: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    className="col-span-1 grid place-items-center text-navy/40 hover:text-red-600"
-                    onClick={() => setForm({ ...form, items: form.items.filter((_, i) => i !== index) })}
-                    disabled={form.items.length === 1}
-                    aria-label="Remove line item"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <div key={index} className="grid grid-cols-2 gap-3 rounded-xl border border-navy/10 p-3 lg:grid-cols-12">
+                  <label className="label col-span-2 lg:col-span-6">Particulars / service<input className="input" required value={item.item} onChange={(e) => updateItem(index, { item: e.target.value })} placeholder="Integrated pest management service"/></label>
+                  <label className="label col-span-1 lg:col-span-2">Quantity<input type="number" min="1" className="input" value={item.quantity} onChange={(e) => updateItem(index, { quantity: e.target.value })}/></label>
+                  <label className="label col-span-1 lg:col-span-2">Unit rate<input type="number" min="0" step="0.01" className="input" value={item.unitPrice} onChange={(e) => updateItem(index, { unitPrice: e.target.value })}/></label>
+                  <label className="label col-span-1 lg:col-span-1">Discount<input type="number" min="0" step="0.01" className="input" value={item.discount} onChange={(e) => updateItem(index, { discount: e.target.value })}/></label>
+                  <button type="button" className="col-span-1 mt-6 grid min-h-10 place-items-center text-navy/40 hover:text-red-600" onClick={() => setForm({ ...form, items: form.items.filter((_, i) => i !== index) })} disabled={form.items.length === 1} aria-label="Remove line item"><Trash2 className="h-4 w-4"/></button>
+                  <label className="label col-span-2 lg:col-span-12">Description / service period<input className="input" value={item.description} onChange={e=>updateItem(index,{description:e.target.value})} placeholder="e.g. 2 visits per month"/></label>
                 </div>
               ))}
             </div>
@@ -256,8 +253,10 @@ export default function Quotations() {
             <textarea id="q-terms" rows={3} className="input" value={form.terms} onChange={(e) => setForm({ ...form, terms: e.target.value })} placeholder="Leave blank to use the default terms configured in Settings." />
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2"><label className="label">Document discount<input type="number" min="0" step="0.01" className="input" value={form.discount} onChange={e=>setForm({...form,discount:e.target.value})}/></label><label className="label">Commercial / delivery notes<textarea rows={2} className="input" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></label></div>
+
           <p className="text-right text-sm text-navy/60">
-            Estimated total (before tax): <span className="font-semibold text-navy">{currency(estimate)}</span>
+            Subtotal after discounts: <span className="font-semibold text-navy">{currency(preTax)}</span> · Tax: <span className="font-semibold text-navy">{currency(estimateTax)}</span> · Round off: <span className="font-semibold text-navy">{currency(estimateRoundOff)}</span> · Estimated total: <span className="font-semibold text-navy">{currency(estimate)}</span>
           </p>
           <p className="text-right text-xs text-navy/40">
             Final totals are calculated by the server when the quotation is saved.
@@ -300,6 +299,7 @@ export default function Quotations() {
               <div className="flex justify-between"><span className="text-navy/60">Subtotal</span><span>{currency(detail.subtotal)}</span></div>
               <div className="flex justify-between"><span className="text-navy/60">Discount</span><span>- {currency(detail.discount)}</span></div>
               <div className="flex justify-between"><span className="text-navy/60">Tax</span><span>{currency(detail.tax)}</span></div>
+              <div className="flex justify-between"><span className="text-navy/60">Round off</span><span>{currency(detail.roundOff || 0)}</span></div>
               <div className="flex justify-between border-t border-navy/10 pt-1 font-bold text-navy"><span>Total</span><span>{currency(detail.total)}</span></div>
             </div>
             {detail.terms ? <p className="text-xs text-navy/50">{detail.terms}</p> : null}

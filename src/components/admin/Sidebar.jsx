@@ -4,8 +4,10 @@ import {
   BarChart3,
   Boxes,
   CalendarDays,
+  Check,
   ClipboardList,
   FileText,
+  Image as ImageIcon,
   LayoutDashboard,
   MessageSquare,
   Receipt,
@@ -21,7 +23,9 @@ const NAV = [
   { to: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/admin/enquiries', label: 'Enquiries', Icon: ClipboardList },
   { to: '/admin/bookings', label: 'Bookings', Icon: CalendarDays },
+  { to: '/admin/free-inspections', label: 'Free inspections', Icon: CalendarDays },
   { to: '/admin/appointments', label: 'Appointments', Icon: CalendarDays },
+  { to: '/admin/closure-requests', label: 'Closure requests', Icon: Check },
   { to: '/admin/customers', label: 'Customers', Icon: Users },
   { to: '/admin/employees', label: 'Employees', Icon: UserCog },
   { to: '/admin/quotations', label: 'Quotations', Icon: FileText },
@@ -29,6 +33,7 @@ const NAV = [
   { to: '/admin/inventory', label: 'Inventory', Icon: Boxes },
   { to: '/admin/reviews', label: 'Reviews', Icon: Star },
   { to: '/admin/services', label: 'Services', Icon: Wrench },
+  { to: '/admin/gallery', label: 'Gallery', Icon: ImageIcon },
   { to: '/admin/settings', label: 'Settings', Icon: Settings },
 ];
 

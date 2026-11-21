@@ -17,6 +17,7 @@ const emptyForm = {
   name: '',
   phone: '',
   email: '',
+  gstin: '',
   street: '',
   city: '',
   state: 'West Bengal',
@@ -30,6 +31,7 @@ const toPayload = (form) => ({
   name: form.name.trim(),
   phone: form.phone.trim(),
   email: form.email.trim(),
+  gstin: form.gstin.trim(),
   notes: form.notes,
   status: form.status,
   address: {
@@ -62,6 +64,7 @@ export default function Customers() {
       name: row.name || '',
       phone: row.phone || '',
       email: row.email || '',
+      gstin: row.gstin || '',
       street: row.address?.street || '',
       city: row.address?.city || '',
       state: row.address?.state || 'West Bengal',
@@ -257,6 +260,7 @@ export default function Customers() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </div>
+            <div className="sm:col-span-2"><label className="label" htmlFor="c-gstin">Customer GSTIN</label><input id="c-gstin" className="input" value={form.gstin} onChange={e=>setForm({...form,gstin:e.target.value})}/></div>
           </div>
 
           <fieldset className="space-y-4 rounded-xl border border-navy/10 p-4">

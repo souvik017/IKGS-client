@@ -79,7 +79,7 @@ export default function CustomerDetail() {
         <ArrowLeft className="h-4 w-4" /> Back to customers
       </Link>
 
-      <PageHeader title={customer.name} description={customer.customerId} />
+      <PageHeader title={customer.name} description={customer.customerId}><Link className="btn-primary" to={`/admin/invoices?customer=${customer._id}`}>Create invoice</Link></PageHeader>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card py-4">

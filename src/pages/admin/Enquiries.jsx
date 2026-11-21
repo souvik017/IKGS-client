@@ -23,6 +23,7 @@ export default function Enquiries() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
+  const [createCustomer, setCreateCustomer] = useState(false);
 
   const openDetail = async (row) => {
     setSelected({ ...row, followUpNote: '', newStatus: row.status });
@@ -64,8 +65,8 @@ export default function Enquiries() {
   const convert = async () => {
     setBusy(true);
     try {
-      await post(`/enquiries/${selected._id}/convert`, { createBooking: true });
-      toast.success('Converted to customer and booking');
+      await post(`/enquiries/${selected._id}/convert`, { createCustomer, createBooking: true });
+      toast.success(createCustomer ? 'Booking created and customer saved' : 'Booking created without saving a customer');
       setSelected(null);
       reload();
     } catch (err) {
@@ -193,7 +194,7 @@ export default function Enquiries() {
               <button type="button" className="btn-outline" onClick={() => setSelected(null)}>Close</button>
               <button type="button" className="btn-ghost" onClick={saveStatus} disabled={busy}>Save status</button>
               {selected.status !== 'converted' ? (
-                <button type="button" className="btn-primary" onClick={convert} disabled={busy}>Convert to customer</button>
+                <button type="button" className="btn-primary" onClick={convert} disabled={busy}>Create booking</button>
               ) : null}
             </>
           ) : null
@@ -226,6 +227,8 @@ export default function Enquiries() {
                 <p className="text-sm text-navy/70">{selected.details}</p>
               </div>
             ) : null}
+
+            {selected.status !== 'converted' ? <label className="flex items-start gap-2 rounded-xl bg-blue-50 p-3 text-sm text-blue-950"><input type="checkbox" checked={createCustomer} onChange={e=>setCreateCustomer(e.target.checked)} /><span><b>Also save as a customer</b><span className="block text-xs text-blue-800/70">Off by default. The booking is created as a lead without a customer record.</span></span></label> : null}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>

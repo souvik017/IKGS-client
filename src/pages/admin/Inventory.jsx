@@ -26,6 +26,11 @@ export default function Inventory() {
   const [movement, setMovement] = useState(blankMovement);
   const [detail, setDetail] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyPages, setHistoryPages] = useState(1);
+  const [historyType, setHistoryType] = useState('');
 
   const startCreate = () => {
     setEditing(null);
@@ -98,6 +103,12 @@ export default function Inventory() {
     }
   };
 
+  const loadHistory = async (page=1,type=historyType) => {
+    try { const res = await get('/inventory/movements', { limit: 20, page, type:type||undefined }); setHistory(res.data); setHistoryPage(res.pagination.page); setHistoryPages(res.pagination.pages); }
+    catch (err) { toast.error(err.message); }
+  };
+  const viewHistory = async () => { setHistoryOpen(true); await loadHistory(1,historyType); };
+
   const columns = [
     {
       key: 'itemName',
@@ -147,6 +158,7 @@ export default function Inventory() {
   return (
     <>
       <PageHeader title="Inventory" description="Stock levels, movements and low-stock alerts.">
+        <button type="button" className="btn-outline" onClick={viewHistory}>Stock movement history</button>
         <button type="button" className="btn-primary" onClick={startCreate}>
           Add Item
         </button>
@@ -306,11 +318,10 @@ export default function Inventory() {
                   <li className="text-sm text-navy/50">No movements recorded yet.</li>
                 ) : (
                   detail.transactions.map((t) => (
-                    <li key={t._id} className="flex items-center justify-between rounded-lg border border-navy/10 px-3 py-2 text-sm">
-                      <span className={t.type === 'stock-in' ? 'text-emerald-600' : 'text-red-600'}>
-                        {t.type === 'stock-in' ? '+' : '-'}{t.quantity}
-                      </span>
+                    <li key={t._id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-navy/10 px-3 py-2 text-sm">
+                      <span className={t.type === 'stock-in' ? 'text-emerald-600' : 'text-red-600'}>{t.type === 'stock-in' ? '+' : '-'}{t.quantity} {detail.item.unit}</span>
                       <span className="text-xs text-navy/50">Balance {t.balanceAfter}</span>
+                      <span className="text-xs text-navy/50">{t.appointment?.appointmentId ? `${t.appointment.appointmentId} · ${t.customerName||''}` : t.reference||t.notes||'—'}</span>
                       <span className="text-xs text-navy/40">{formatDate(t.createdAt, true)}</span>
                     </li>
                   ))
@@ -319,6 +330,10 @@ export default function Inventory() {
             </div>
           </div>
         ) : null}
+      </Modal>
+
+      <Modal open={historyOpen} title="All stock movements" onClose={() => setHistoryOpen(false)} size="lg">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-sm text-navy/55">Every stock entry and issue, including appointment-linked usage.</p><select className="input w-40" value={historyType} onChange={e=>{setHistoryType(e.target.value);loadHistory(1,e.target.value);}}><option value="">All movement types</option><option value="stock-in">Stock in</option><option value="stock-out">Stock out</option><option value="adjustment">Adjustment</option></select></div><div className="max-h-[58vh] overflow-auto"><table className="min-w-full text-left text-sm"><thead className="sticky top-0 bg-white"><tr className="border-b text-xs uppercase text-navy/50"><th className="p-2">Date</th><th className="p-2">Item</th><th className="p-2">Type</th><th className="p-2">Quantity</th><th className="p-2">Appointment / reference</th><th className="p-2">Customer</th><th className="p-2">Balance</th><th className="p-2">Entered by</th></tr></thead><tbody>{history.map(t=><tr key={t._id} className="border-b border-navy/5"><td className="p-2 whitespace-nowrap">{formatDate(t.createdAt,true)}</td><td className="p-2">{t.item?.itemName||'—'}</td><td className="p-2"><span className={t.type==='stock-in'?'text-emerald-700':'text-amber-700'}>{t.type}</span></td><td className="p-2">{t.quantity} {t.item?.unit}</td><td className="p-2">{t.appointment?.appointmentId||t.reference||'—'}</td><td className="p-2">{t.customerName||'—'}</td><td className="p-2">{t.balanceAfter}</td><td className="p-2">{t.performedBy?.name||'—'}</td></tr>)}{history.length===0&&<tr><td className="p-5 text-center text-navy/50" colSpan="8">No movements recorded yet.</td></tr>}</tbody></table></div><div className="mt-3 flex items-center justify-between"><span className="text-xs text-navy/50">Page {historyPage} of {historyPages}</span><div className="flex gap-2"><button className="btn-outline" disabled={historyPage<=1} onClick={()=>loadHistory(historyPage-1)}>Previous</button><button className="btn-outline" disabled={historyPage>=historyPages} onClick={()=>loadHistory(historyPage+1)}>Next</button></div></div>
       </Modal>
     </>
   );

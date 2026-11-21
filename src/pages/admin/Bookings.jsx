@@ -20,7 +20,7 @@ export default function Bookings() {
   const [selected, setSelected] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [convertOpen, setConvertOpen] = useState(false);
-  const [convertForm, setConvertForm] = useState({ date: '', time: '', employee: '', jobNotes: '' });
+  const [convertForm, setConvertForm] = useState({ date: '', time: '', employee: '', address: '', jobNotes: '' });
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -33,6 +33,7 @@ export default function Bookings() {
     try {
       await put(`/bookings/${booking._id}/status`, { status });
       toast.success(`Booking marked ${status}`);
+      if (status === 'confirmed' && !booking.hasAppointment) openConvert(booking);
       reload();
     } catch (err) {
       toast.error(err.message);
@@ -45,6 +46,7 @@ export default function Bookings() {
       date: toDateInput(booking.preferredDate) || toDateInput(new Date()),
       time: booking.preferredTime || '',
       employee: '',
+      address: booking.address || '',
       jobNotes: '',
     });
     setConvertOpen(true);
@@ -96,9 +98,7 @@ export default function Bookings() {
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
-          <button type="button" className="link text-sm" onClick={() => openConvert(r)} title="Convert to appointment">
-            <CalendarPlus className="h-4 w-4" />
-          </button>
+          {r.status === 'confirmed' && !r.hasAppointment ? <button type="button" className="link text-sm" onClick={() => openConvert(r)} title="Convert to appointment"><CalendarPlus className="h-4 w-4" /></button> : null}
         </div>
       ),
     },
@@ -158,6 +158,10 @@ export default function Bookings() {
               <label className="label" htmlFor="c-time">Time</label>
               <input id="c-time" className="input" placeholder="e.g. 10:00" value={convertForm.time} onChange={(e) => setConvertForm({ ...convertForm, time: e.target.value })} />
             </div>
+          </div>
+          <div>
+            <label className="label" htmlFor="c-address">Detailed service location *</label>
+            <textarea id="c-address" required rows={2} className="input" value={convertForm.address} onChange={(e) => setConvertForm({ ...convertForm, address: e.target.value })} />
           </div>
           <div>
             <label className="label" htmlFor="c-employee">Assign employee</label>

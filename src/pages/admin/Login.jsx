@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, LogIn, Mail } from 'lucide-react';
@@ -19,7 +20,7 @@ export default function Login() {
   } = useForm();
 
   if (!loading && admin) {
-    return <Navigate to={location.state?.from || '/admin/dashboard'} replace />;
+    return <Navigate to={admin?.accountType === 'employee' ? '/employee' : (location.state?.from || '/admin/dashboard')} replace />;
   }
 
   const onSubmit = async (values) => {
@@ -27,7 +28,7 @@ export default function Login() {
     try {
       const loggedIn = await login(values.email, values.password);
       toast.success(`Welcome back, ${loggedIn.name}`);
-      navigate(location.state?.from || '/admin/dashboard', { replace: true });
+      navigate(loggedIn?.accountType === 'employee' ? '/employee' : (location.state?.from || '/admin/dashboard'), { replace: true });
     } catch (err) {
       setServerError(err.message);
     }
@@ -35,15 +36,15 @@ export default function Login() {
 
   return (
     <div className="grid min-h-screen place-items-center bg-navy px-4 py-12">
-      <Seo title="Admin Login" description="IKGS Solution administration sign-in." path="/admin/login" noindex />
+      <Seo title="Staff Login" description="IKGS Solution staff sign-in." path="/admin/login" noindex />
 
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-royal text-lg font-extrabold text-white">
             IK
           </span>
-          <h1 className="mt-4 text-2xl font-bold text-white">IKGS Solution Admin</h1>
-          <p className="mt-1 text-sm text-white/60">Sign in to manage your business</p>
+          <h1 className="mt-4 text-2xl font-bold text-white">IKGS Solution</h1>
+          <p className="mt-1 text-sm text-white/60">Sign in to your staff workspace</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-2xl bg-white p-8 shadow-xl" noValidate>
@@ -90,6 +91,7 @@ export default function Login() {
             {isSubmitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
+        <p className="mt-4 text-center text-sm"><Link className="text-white/70 underline hover:text-white" to="/forgot-password">Forgot your password?</Link></p>
 
         <p className="mt-6 text-center text-xs text-white/40">
           Authorised personnel only. All activity may be logged.

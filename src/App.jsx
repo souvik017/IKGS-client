@@ -27,8 +27,10 @@ const Login = lazy(() => import('./pages/admin/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Enquiries = lazy(() => import('./pages/admin/Enquiries'));
 const Bookings = lazy(() => import('./pages/admin/Bookings'));
+const FreeInspections = lazy(() => import('./pages/admin/FreeInspections'));
 const Appointments = lazy(() => import('./pages/admin/Appointments'));
 const Employees = lazy(() => import('./pages/admin/Employees'));
+const EmployeeDetail = lazy(() => import('./pages/admin/EmployeeDetail'));
 const Customers = lazy(() => import('./pages/admin/Customers'));
 const CustomerDetail = lazy(() => import('./pages/admin/CustomerDetail'));
 const Quotations = lazy(() => import('./pages/admin/Quotations'));
@@ -37,6 +39,11 @@ const Inventory = lazy(() => import('./pages/admin/Inventory'));
 const Reviews = lazy(() => import('./pages/admin/Reviews'));
 const ServicesAdmin = lazy(() => import('./pages/admin/ServicesAdmin'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
+const EmployeePortal = lazy(() => import('./pages/admin/EmployeePortal'));
+const ClosureRequests = lazy(() => import('./pages/admin/ClosureRequests'));
+const GalleryAdmin = lazy(() => import('./pages/admin/GalleryAdmin'));
+const ForgotPassword = lazy(() => import('./pages/admin/PasswordReset').then((module) => ({ default: module.ForgotPassword })));
+const ResetPassword = lazy(() => import('./pages/admin/PasswordReset').then((module) => ({ default: module.ResetPassword })));
 
 /** Fallback shown while a lazily-loaded route chunk is being fetched. */
 const RouteFallback = () => <Loading label="Loading…" className="py-24" />;
@@ -44,6 +51,7 @@ const RouteFallback = () => <Loading label="Loading…" className="py-24" />;
 export default function App() {
   return (
     <Routes>
+      <Route path="/employee" element={<ProtectedRoute employeeOnly><Suspense fallback={<RouteFallback />}><EmployeePortal /></Suspense></ProtectedRoute>} />
       {/* Public website */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
@@ -65,6 +73,8 @@ export default function App() {
           </Suspense>
         }
       />
+      <Route path="/forgot-password" element={<Suspense fallback={<RouteFallback />}><ForgotPassword /></Suspense>} />
+      <Route path="/reset-password" element={<Suspense fallback={<RouteFallback />}><ResetPassword /></Suspense>} />
       <Route
         path="/admin"
         element={
@@ -77,8 +87,11 @@ export default function App() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="enquiries" element={<Enquiries />} />
         <Route path="bookings" element={<Bookings />} />
+        <Route path="free-inspections" element={<FreeInspections />} />
         <Route path="appointments" element={<Appointments />} />
+        <Route path="closure-requests" element={<ClosureRequests />} />
         <Route path="employees" element={<Employees />} />
+        <Route path="employees/:id" element={<EmployeeDetail />} />
         <Route path="customers" element={<Customers />} />
         <Route path="customers/:id" element={<CustomerDetail />} />
         <Route path="quotations" element={<Quotations />} />
@@ -86,6 +99,7 @@ export default function App() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="services" element={<ServicesAdmin />} />
+        <Route path="gallery" element={<GalleryAdmin />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

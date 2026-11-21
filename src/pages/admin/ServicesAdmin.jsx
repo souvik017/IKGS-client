@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { ImagePlus, Pencil, Plus, Power, Trash2, X } from 'lucide-react';
+import { Download, FileUp, ImagePlus, Pencil, Plus, Power, Trash2, X } from 'lucide-react';
 
 import PageHeader from '../../components/admin/PageHeader';
 import DataTable from '../../components/admin/DataTable';
@@ -10,7 +10,6 @@ import Modal from '../../components/admin/Modal';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import useResource from '../../hooks/useResource';
 import { del, post, put, resolveAsset } from '../../lib/api';
-import { currency } from '../../lib/format';
 import { SERVICE_IMAGES } from '../../lib/brand';
 
 const blankForm = {
@@ -18,7 +17,6 @@ const blankForm = {
   shortDescription: '',
   description: '',
   image: '',
-  startingPrice: 0,
   displayOrder: 0,
   featured: false,
   active: true,
@@ -41,6 +39,8 @@ export default function ServicesAdmin() {
   const [imagePreview, setImagePreview] = useState(null);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
 
   const resetImageState = () => {
     // Release the object URL so a long admin session does not leak memory.
@@ -63,7 +63,6 @@ export default function ServicesAdmin() {
       shortDescription: row.shortDescription || '',
       description: row.description || '',
       image: row.image || '',
-      startingPrice: row.startingPrice || 0,
       displayOrder: row.displayOrder || 0,
       featured: Boolean(row.featured),
       active: row.active,
@@ -125,6 +124,10 @@ export default function ServicesAdmin() {
     }
   };
 
+  const sampleJson = JSON.stringify({ services: [{ title: 'Residential Pest Control', slug: 'residential-pest-control', shortDescription: 'Pest inspection and treatment for homes.', description: 'Describe the service and scope here.', image: '', icon: '', active: true, featured: false, displayOrder: 1, seoTitle: 'Residential Pest Control', seoDescription: 'Request an inspection and quote.' }] }, null, 2);
+  const downloadSample = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([sampleJson], { type: 'application/json' })); a.download = 'services.sample.json'; a.click(); URL.revokeObjectURL(a.href); };
+  const importJson = async () => { try { const parsed = JSON.parse(bulkText); const services = Array.isArray(parsed) ? parsed : parsed.services; if (!Array.isArray(services)) throw new Error('JSON must be an array or contain a services array'); setBusy(true); const result = await post('/services/bulk', { services }); toast.success(`${result.data.imported} services imported`); setBulkOpen(false); setBulkText(''); reload(); } catch (err) { toast.error(err.message || 'Invalid JSON'); } finally { setBusy(false); } };
+
   const toggleActive = async (row) => {
     try {
       await put(`/services/${row._id}`, { active: !row.active });
@@ -172,7 +175,6 @@ export default function ServicesAdmin() {
         </div>
       ),
     },
-    { key: 'startingPrice', header: 'From', render: (r) => (Number(r.startingPrice) > 0 ? currency(r.startingPrice) : 'On request') },
     { key: 'displayOrder', header: 'Order', render: (r) => r.displayOrder ?? 0 },
     { key: 'featured', header: 'Featured', render: (r) => (r.featured ? 'Yes' : '—') },
     { key: 'active', header: 'Status', render: (r) => <StatusBadge status={r.active ? 'active' : 'inactive'} /> },
@@ -211,6 +213,7 @@ export default function ServicesAdmin() {
   return (
     <>
       <PageHeader title="Services" description="Manage the public service catalogue.">
+        <button type="button" className="btn-outline" onClick={() => setBulkOpen(true)}><FileUp className="h-4 w-4" />Bulk import JSON</button>
         <button type="button" className="btn-primary" onClick={startCreate}>
           <Plus className="h-4 w-4" /> Add Service
         </button>
@@ -304,7 +307,7 @@ export default function ServicesAdmin() {
                       <X className="h-3.5 w-3.5" /> Remove
                     </button>
                   ) : (
-                    <span className="text-xs text-navy/50">JPEG, PNG or WEBP up to 5 MB</span>
+                    <span className="text-xs text-navy/50">JPEG, PNG or WEBP up to 5 MB · stored in Cloudinary</span>
                   )}
                 </div>
               </div>
@@ -337,10 +340,6 @@ export default function ServicesAdmin() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="label" htmlFor="s-price">Starting price</label>
-              <input id="s-price" type="number" min="0" step="0.01" className="input" value={form.startingPrice} onChange={(e) => setForm({ ...form, startingPrice: e.target.value })} />
-            </div>
-            <div>
               <label className="label" htmlFor="s-order">Display order</label>
               <input id="s-order" type="number" className="input" value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: e.target.value })} />
             </div>
@@ -364,6 +363,12 @@ export default function ServicesAdmin() {
             </div>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={bulkOpen} title="Bulk import services" onClose={() => setBulkOpen(false)} size="lg" footer={<><button type="button" className="btn-outline" onClick={() => setBulkOpen(false)}>Cancel</button><button type="button" className="btn-primary" disabled={busy || !bulkText.trim()} onClick={importJson}>{busy ? 'Importing…' : 'Import services'}</button></>}>
+        <p className="mb-3 text-sm text-navy/60">Paste a JSON array or an object with a <code>services</code> array. Each service needs a title. Up to 100 services per batch.</p>
+        <div className="mb-3 flex flex-wrap gap-2"><button type="button" className="btn-outline" onClick={downloadSample}><Download className="h-4 w-4" />Download sample JSON</button><label className="btn-outline cursor-pointer"><FileUp className="h-4 w-4" />Choose JSON file<input type="file" accept=".json,application/json" className="sr-only" onChange={e => { const file=e.target.files?.[0]; if(file) file.text().then(setBulkText); }} /></label></div>
+        <label className="label" htmlFor="services-json">Services JSON</label><textarea id="services-json" className="input min-h-72 font-mono text-xs" value={bulkText} onChange={e => setBulkText(e.target.value)} placeholder={sampleJson} />
       </Modal>
 
       <ConfirmDialog

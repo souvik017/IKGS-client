@@ -158,14 +158,7 @@ export default function ServiceDetail() {
           {/* Sticky booking panel */}
           <aside className="lg:col-span-1">
             <div className="sticky top-24 rounded-2xl border border-line bg-white p-6 shadow-card">
-              {Number(service.startingPrice) > 0 ? (
-                <>
-                  <p className="text-sm font-medium text-body">Starting from</p>
-                  <p className="text-3xl font-extrabold text-navy">{currency(service.startingPrice)}</p>
-                </>
-              ) : (
-                <p className="text-lg font-bold text-navy">Price on request</p>
-              )}
+              <p className="text-lg font-bold text-navy">Request service pricing</p>
               <p className="mt-2 text-xs text-body">
                 Final cost depends on property size and the treatment required.
               </p>

@@ -12,6 +12,7 @@
     "seo": "node scripts/generate-sitemap.mjs && node scripts/prerender.mjs"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.9.0",
     "axios": "^1.6.0",
     "classnames": "^2.3.2",
     "date-fns": "^2.30.0",

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bug } from 'lucide-react';
 import { resolveAsset } from '../../lib/api';
-import { currency } from '../../lib/format';
 import { SERVICE_IMAGES } from '../../lib/brand';
 
 /**
@@ -61,15 +60,7 @@ export default function ServiceCard({ service, featureIcon: Icon = Bug }) {
         </p>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-line pt-4 transition-colors duration-300 group-hover:border-white/20">
-          {Number(service.startingPrice) > 0 ? (
-            <span className="text-sm font-bold text-navy transition-colors duration-300 group-hover:text-white">
-              From {currency(service.startingPrice)}
-            </span>
-          ) : (
-            <span className="text-sm font-medium text-body transition-colors duration-300 group-hover:text-white/70">
-              Price on request
-            </span>
-          )}
+          <span className="text-sm font-medium text-body transition-colors duration-300 group-hover:text-white/70">Request a quote</span>
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all duration-300 group-hover:text-white">
             Learn more
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />

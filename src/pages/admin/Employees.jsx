@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { Pencil, Plus, RefreshCw, UserX, UserCheck } from 'lucide-react';
+import { Eye, Pencil, Plus, RefreshCw, UserX, UserCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import PageHeader from '../../components/admin/PageHeader';
 import DataTable from '../../components/admin/DataTable';
@@ -11,7 +12,7 @@ import useResource from '../../hooks/useResource';
 import { post, put } from '../../lib/api';
 import { formatDate, toDateInput } from '../../lib/format';
 
-const emptyForm = { name: '', phone: '', email: '', designation: '', joiningDate: '', notes: '', active: true };
+const emptyForm = { name: '', phone: '', email: '', designation: '', joiningDate: '', dateOfBirth: '', address: '', aadhaar: '', notes: '', active: true, password: '' };
 
 export default function Employees() {
   const { rows, pagination, loading, error, page, setPage, search, setSearch, reload } = useResource('/employees');
@@ -37,6 +38,10 @@ export default function Employees() {
       joiningDate: toDateInput(row.joiningDate),
       notes: row.notes || '',
       active: row.active,
+      password: '',
+      dateOfBirth: toDateInput(row.dateOfBirth),
+      address: row.address || '',
+      aadhaar: '',
     });
     setOpen(true);
   };
@@ -95,6 +100,7 @@ export default function Employees() {
           <button type="button" className="link" onClick={() => startEdit(r)} title="Edit">
             <Pencil className="h-4 w-4" />
           </button>
+          <Link className="link" to={`/admin/employees/${r._id}`} title="View employee profile"><Eye className="h-4 w-4"/></Link>
           <button type="button" className="link" onClick={() => toggleActive(r)} title={r.active ? 'Deactivate' : 'Activate'}>
             {r.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
           </button>
@@ -154,12 +160,16 @@ export default function Employees() {
             </div>
             <div>
               <label className="label" htmlFor="emp-email">Email</label>
-              <input id="emp-email" type="email" className="input" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <input id="emp-email" type="email" required className="input" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div>
               <label className="label" htmlFor="emp-designation">Designation</label>
               <input id="emp-designation" className="input" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} />
             </div>
+            <div className="sm:col-span-2"><label className="label" htmlFor="emp-password">{editing ? 'Reset login password (optional)' : 'Employee login password *'}</label><input id="emp-password" type="password" required={!editing} minLength="8" autoComplete="new-password" className="input" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} /><p className="mt-1 text-xs text-navy/50">Employees sign in with this email and password.</p></div>
+            <div><label className="label" htmlFor="emp-dob">Date of birth</label><input id="emp-dob" type="date" className="input" value={form.dateOfBirth} onChange={e=>setForm({...form,dateOfBirth:e.target.value})}/></div>
+            <div><label className="label" htmlFor="emp-aadhaar">Aadhaar number</label><input id="emp-aadhaar" inputMode="numeric" autoComplete="off" maxLength="12" className="input" placeholder={editing?.aadhaarLast4 ? `Saved ending ${editing.aadhaarLast4}` : '12 digits'} value={form.aadhaar} onChange={e=>setForm({...form,aadhaar:e.target.value.replace(/\D/g,'')})}/><p className="mt-1 text-xs text-navy/50">Encrypted at rest; only the last four digits are shown after saving.</p></div>
+            <div className="sm:col-span-2"><label className="label" htmlFor="emp-address">Home address</label><textarea id="emp-address" rows="2" className="input" value={form.address} onChange={e=>setForm({...form,address:e.target.value})}/></div>
             <div>
               <label className="label" htmlFor="emp-joining">Joining date</label>
               <input id="emp-joining" type="date" className="input" value={form.joiningDate} onChange={(e) => setForm({ ...form, joiningDate: e.target.value })} />
